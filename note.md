@@ -14,4 +14,15 @@
 
 </div>
 
-对于queuing delay,需要注意的是，La/R < 1，其中L是每个包的bit数，a是每秒中包的个数，R是路由传输数据的速率，可想而知，如果
+对于queuing delay,需要注意的是，La/R < 1，其中L是每个包的bit数，a是每秒中包的个数，R是路由传输数据的速率，可想而知，如果此数值大于1，那么queuing delay将会增加到无穷大，另外，随着该值的增加，queuing delay呈**指数**增加。
+
+
+就损失而言，因为一个router不可能有无限大的queue，所以当host向一个已经满的router发送一个包的时候，这个包就被丢弃掉了，所以当我们考虑一个节点性能的时候，不仅要考虑delay，还要考虑loss的情况。
+
+对于吞吐量而言，一般router之间的速率很快，所以速度只取决于server到第一个router和，最后的router到client的速率最小值。对于更现实的多个client连接多个server而言，如果R远大于Rs和Rc的话，依然公式不变，如果R比较小的话，那就是R/N了。(图中N是10)
+
+<div align=center>  
+
+![](./IMG/1-4-2-average_queuing_delay.PNG)
+
+</div>
