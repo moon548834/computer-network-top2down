@@ -9,8 +9,8 @@
 - propagation  这个延时定义为 d/s 其中d代表distance， s代表speed， 一般而言s比光速慢一点
 
 <div align=center>  
-
-![](./IMG/1-4-2-average_queuing_delay.PNG)
+ 
+![](./IMG/1-4-2-average_quening_delay.PNG)
 
 </div>
 
@@ -23,6 +23,36 @@
 
 <div align=center>  
 
-![](./IMG/1-4-2-average_queuing_delay.PNG)
+![](./IMG/1-4-4-throughout.PNG)
 
 </div>
+
+### 1.5 协议层
+```
++---Protocol---+
+|  Application |
+|  Transport   |
+|  Network     |
+|  (Link)      |
+|  Physical    |
++--------------+
+```
+
+应用层：如HTTP，FTP等 数据单元称为报文(message)。
+传输层：TCP，UDP, 负责向两台主机中进程之间的通信提供通用的数据传输服务。
+网络层：在TCP/IP体系中，网络层使用IP协议
+数据链路层：帧格式
+物理层：比特，确定插头电缆连接等。
+
+相比于OSI七层协议，缺少了 presentation layer 和 session layer，前者包括数据压缩描述等，后者包括数据交换的同步与界定。
+
+一个非常直观的描述图，描述PC，交换机，路由器各自工作的layer。
+
+<div align=center>  
+
+![](IMG/1-5-2-layers_protocol.PNG)
+
+</div>
+
+
+### 1.6 当网络受到攻击
