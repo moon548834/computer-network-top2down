@@ -1,5 +1,12 @@
 # 计算机网络 自顶向下方法(原书第6版)
 ## 第一章
+
+### 1.3 packet switching(分组交换) and circuit switching(电路交换)
+特点：
+    电路交换：在通话的全部时间内，通话的两个用户始终占用端到端的通信资源，此时线路的传输效率很低。
+    分组交换：不需要建立整个连接，以packet为单位灵活发送，对通信链路是逐段占用。
+
+
 ### 1.4 延时，损失，吞吐量
 延时由四部分组成，processing, queuing, transmission, propagation组成，一般而言，processing的延时比较少，可以忽略不计。
 
@@ -56,3 +63,10 @@
 
 
 ### 1.6 当网络受到攻击
+
+途径: malware, DoS攻击，DDoS攻击，packet sniffer, ip欺骗，
+
+DoS攻击：Vulnerability attack, Bandwidth flooding, connection flooding。
+DDoS：分布式的Dos,多个源。
+
+
