@@ -287,6 +287,10 @@ POP3协议的一个特点是，只要用户从POP3服务器读取了邮件，这
 
 </div>
 
+### 2.4 FTP
+
+FTP:基于TCP，和HTTP部不同的是，FTP使用两个并行的TCP连接来传输文件，控制和数据。所以HTTP是 in-hand, FTP是out-of-band。另外FTP的data连接是不连续的，所以每次TCP只能传送一个文件；FTP server端必须维护用户的状态；FTP也是使用7bit的ASCII码，这让它容易阅读。
+
 ### 2.5 DNS
 
 DNS最主要的作用是将hostname翻译成IP地址，DNS实际上是一个分布式的系统，它通过一组DNS服务器来组成的，DNS同时还是一个用户层的协议允许host查询分布式系统，DNS协议是允许在UDP上的使用端口53。
