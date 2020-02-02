@@ -149,3 +149,201 @@ Web cache或者说proxy server,代理服务器是拥有自己的硬盘空间来�
 #### conditional GET
 
 就像内存和cache的关系一样，有更新的问题，这里才用的方法是发送GET的同时，包含这样一个header line:`If-Modified-Since`(由web cache发送给最终的服务器端),如果修改了就更新即可。
+
+### 2.3电子邮件
+
+在不同的邮件server端通过SMTP协议传输，SMTP依托TCP
+
+<div align=center>  
+ 
+![](./IMG/2-3-1-email_system.PNG)
+
+</div>
+
+由上图，一个网络的邮件系统由三部分组成，用户代理(如Outlook)，邮件服务器，SMTP传输协议。
+
+SMTP通信握手信号可读性很好。这是一个例子：
+
+```
+S: 220 hamburger.edu
+C: HELO crepes.fr
+S: 250 Hello crepes.fr, pleased to meet youC: MAIL FROM: <alice@crepes.fr>
+C: MAIL FROM: <alice@crepes.fr>
+S: 250 alice@crepes.fr ... Sender ok
+C: RCPT TO: <bob@hamburger.edu>
+S: 250 bob@hamburger.edu ... Recipient ok
+C: DATA
+S: 354 Enter mail, end with ”.” on a line by itself
+C: Do you like ketchup?
+C: How about pickles?
+C: .
+S: 250 Message accepted for delivery
+C: QUIT
+S: 221 hamburger.edu closing connection
+```
+
+Client端使用了五个命令,HELO,FROM,RCPT TO,DATA,QUIT，都不需要额外解释。
+
+另外SMTP还是一个持续连接，这意味着A mail server发送给B mail server很多邮件时，可以在1个TCP中发送全部数据。
+
+#### SMTP和HTTP对比
+
+
+|        SMTP       |        HTTP        |
+|-------------------|--------------------|
+| 必须是7-bit ASCII |   无要求            |
+| 方向是 push       | 方向是pull          |
+| 多object一message | 一object一message   |
+
+SMTP要求邮件主体必须是7-bit的ASCII码，
+
+#### header格式
+
+```
+From: alice@crepes.fr
+To: bob@hamburger.edu
+Subject: XXX
+```
+
+<div align=center>  
+ 
+![](./IMG/2-3-4-email_with_server.PNG)
+
+</div>
+
+用户在PC上运行用户代理，理论上讲，邮件server可以在他的PC上，单这要求他的PC一直不关机，所以通常的办法如上图所示。需要注意的是，SMTP是一个push的协议，所以对于图中Bob的server端到Bob的用户代理，不能用SMTP。这部分通常用POP3，IMAP或者HTTP完成。
+
+POP3是一个非常简单的协议，用户代理只有4个命令list,retr(获取),dele,quit。一个例子：
+
+```
+C: list
+S: 1 498
+S: 2 912S: .
+S: .
+C: retr 1
+S: (blah blah ...
+S: .................
+S: ..........blah)
+S: .
+C: dele 1
+C: retr 2
+S: (blah blah ...
+S: .................
+S: ..........blah)
+S: .
+C: dele 2
+C: quit
+S: +OK POP3 server signing off
+```
+
+> . 用来结束文件
+
+POP3协议的一个特点是，只要用户从POP3服务器读取了邮件，这个邮件就会被删除(download-and-delete mode)，这在某些情况下不太方便，因而POP3进行了一些扩充(download-and-keep)。
+
+另一种协议是IMAP，比较复杂，他将每个邮件和文件夹联系了起来，这样就不会有读取完删除在另一台PC无法看的问题了。另一个特点是IMAP运行用户获取邮件的一部分信息，比如只获取header。
+
+
+<div align=center>  
+ 
+![](./IMG/2-3-4_email_with_server.PNG)
+
+</div>
+
+用户在PC上运行用户代理，理论上讲，邮件server可以在他的PC上，单这要求他的PC一直不关机，所以通常的办法如上图所示。需要注意的是，SMTP是一个push的协议，所以对于图中Bob的server端到Bob的用户代理，不能用SMTP。这部分通常用POP3，IMAP或者HTTP完成。
+
+POP3是一个非常简单的协议，用户代理只有4个命令list,retr(获取),dele,quit。一个例子：
+
+```
+C: list
+S: 1 498
+S: 2 912S: .
+S: .
+C: retr 1
+S: (blah blah ...
+S: .................
+S: ..........blah)
+S: .
+C: dele 1
+C: retr 2
+S: (blah blah ...
+S: .................
+S: ..........blah)
+S: .
+C: dele 2
+C: quit
+S: +OK POP3 server signing off
+```
+
+> . 用来结束文件
+
+POP3协议的一个特点是，只要用户从POP3服务器读取了邮件，这个邮件就会被删除(download-and-delete mode)，这在某些情况下不太方便，因而POP3进行了一些扩充(download-and-keep)。
+
+另一种协议是IMAP，比较复杂，他将每个邮件和文件夹联系了起来，这样就不会有读取完删除在另一台PC无法看的问题了。另一个特点是IMAP运行用户获取邮件的一部分信息，比如只获取header。
+
+
+<div align=center>  
+ 
+![](./IMG/2-3-5-POP3_IMAP.PNG)
+
+</div>
+
+### 2.5 DNS
+
+DNS最主要的作用是将hostname翻译成IP地址，DNS实际上是一个分布式的系统，它通过一组DNS服务器来组成的，DNS同时还是一个用户层的协议允许host查询分布式系统，DNS协议是允许在UDP上的使用端口53。
+
+通常，DNS和其他应用层协议相互配合，举个例子：当一个浏览器(HTTP 客户端)运行在某个host上，请求一个URL(如www.bit.edu.cn)，那么我们首先需要获得这个URL对应的ip地址才可以。
+
+1. 在用户的机器上运行DNS客户端程序
+2. 浏览器提取hostname(www.bit.edu.cn)给DNS用户端使用
+3. DNS用户端给服务器发送一个查询命令
+4. DNS服务器最终返回给客户端对应的IP地址
+5. 一旦浏览器从DNS接收到了IP地址，就可以和HTTP服务器建立连接了！(IP addr:80)
+
+DNS同时还提供了其他几种功能:
+
+- hostname重命名(alias)，方便人们记忆
+- 邮件系统重命名
+- 分布式加载，一个hostname可以有多个IP地址与之对应，比如CNN，这样当用户进行查询CNN的IP地址时，可以返回其中某个IP地址，这样就可以减少访问时的阻塞了
+
+#### DNS系统组成
+
+<div align=center>  
+ 
+![](./IMG/2-5-1-dns_hierarchy.PNG)
+
+</div>
+
+DNS是一个分布式的系统，因为如果所有的映射都保存在一个server，这会带来很多问题。所以形成了如图所示的结构。一共有三种DNS服务器，root, TLD(顶级域名服务器)和authoritative(权限/权威域名服务器)。
+
+#### DNS查询
+
+
+<div align=center>  
+ 
+![](./IMG/2-5-2-dns-interaction.PNG)
+
+</div>
+
+如图所示，还有另一种回溯的办法，不过在实际中，是用上图的迭代法，准确来说:host到local DNS服务器是回溯的，其他的都是迭代的。
+
+#### DNS cache
+
+一般来讲，一个server可以保存一些过往的信息，比如local DNS可以保存TLDserver的地址，这样就可以绕过访问root了。
+
+DNS服务器存储的是resource records(RRs), 一个RR由思源组构成:
+
+(Name, Value, Type, TTL)
+
+TTL是RR的生命有效期，先可以忽略掉。
+
+一些常见的record:
+| Type  |  意思       |  例子                                  |
+| ----- | ------------|----------------------------------------|
+| A     |IP地址        |(relay1.bar.foo.com, 145.37.93.126, A) |
+| NS    |权威服务器    |(foo.com, dns.foo.com, NS)              |
+| CHAME |主机的规范名字|(foo.com, relay1.bar.foo.com, CNAME)   |
+| MX    |电邮交互名字  |(foo.com, mail.bar.foo.com, MX)         |
+
+#### DDoS
+
+由于DNS比较脆弱，引申出了很多对于DNS攻击，一种方式是通过大量请求，已达到使那些真正的请求被搁置。不过这容易被DNS cache解决掉，另外通过packet filter也可以解决。另一种方式是欺骗方法，攻击者发送一个假的回复给DNS server，使得server接受假的RR存储在cache中，这样就可以把目的的web引导到欺骗者的web上了。
