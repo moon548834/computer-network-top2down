@@ -376,3 +376,23 @@ peer从其他peer每次下载一个数据块，大小是256KB，每一个torrent
 对于第一个问题，Alice会使用一个叫做稀缺优先的准则，举个例子，比如Alice一共有三个邻居，邻居A有块1,2,3;邻居B有块1;邻居C有块1,2，所以这个时候会先请求3。
 
 对于第二个问题，BitTorrent使用了一个比较聪明的算法，基本的准则是给那些可以与Alice连接有快速率的更高的连接优先级。
+
+#### DHT 哈希散列表
+
+下面考虑如何实现一个P2P网络中简单的数据库，这个数据库会存储简单的(key,value)对，下面考虑一个例子。这里key是内容名字，value是peer的IP地址。
+假如Bob和Charlie都有Linux发行版，那么就会保存为(Linux,Bob的IP)和(Linux,Charlie的IP)。然后Dave这里使用DHT存储了<key,value>的信息，那么假设Alice想要获取Linux，首先她应该先获取这个DHT，这样她才知道要给谁请求，谁有Linux。所以实际上她会先去获取Dave里面的DHT的信息，然后访问Bob或者Charlie。
+
+一种建立DHT的方法是Alice向所有的peer去询问谁有Linux，这听起来就很蠢。所以这里会有一种稍微优雅一点的方法，我们把N(4)个peer:Alice,Bob,Charlie,Dave可以映射成log2N个bit进行存储，(00,01,10,11) 这样一个自然的方法是每次都去寻找那个最近的节点，(当然他们在物理上可能很远)。
+(懒得翻译了，感觉挺直白的)
+
+> To gain some insight here, let’s take a look at a specific example. Suppose n = 4 so that all the peer and key identifiers are in
+the range [0, 15]. Further suppose that there are eight peers in the system with identifiers 1, 3, 4, 5, 8, 10, 12, and 15. Finally, suppose we want to store the (key, value) pair(11, Johnny Wu) in one of the eight peers. But in which peer? Using our closest convention, since peer 12 is the closest successor for key 11, we therefore store the pair(11, Johnny Wu) in the peer 12.
+
+假设有一个peer, Alice想要插入一个pair到DHT中，她首先确定哪个标识符离得最近，然后她会给那个标识符(实际上是peer)发送个信息，告诉他存储这个pair。但是Alice怎么知道哪个peer离这个key最近呢，如果Alice知道所有peer的ID和对应的IP地址的话，那她就可以一下子访问到了，不过这在实际的大型系统也是不可能的，一种折中的方法是存储Log2N的pair。
+
+
+<div align=center>  
+ 
+![](./IMG/2-6-2-circular_DHT.PNG)
+
+</div>
