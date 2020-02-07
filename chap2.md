@@ -390,9 +390,73 @@ the range [0, 15]. Further suppose that there are eight peers in the system with
 
 假设有一个peer, Alice想要插入一个pair到DHT中，她首先确定哪个标识符离得最近，然后她会给那个标识符(实际上是peer)发送个信息，告诉他存储这个pair。但是Alice怎么知道哪个peer离这个key最近呢，如果Alice知道所有peer的ID和对应的IP地址的话，那她就可以一下子访问到了，不过这在实际的大型系统也是不可能的，一种折中的方法是存储Log2N的pair。
 
-
 <div align=center>  
  
 ![](./IMG/2-6-2-circular_DHT.PNG)
 
 </div>
+
+### 2.7 socket
+
+socket正如前面提到的，是通信的接口，下面以UDP和TCP分别为例，用实际的python代码展示socket的工作原理。
+
+#### UDP socket
+
+当socket建立时，客户端需要把服务器的端口和地址打包发送，另外客户端自己的端口和地址实际上也会打包发送给对方服务端。虽然加入客户端的地址通常不需要UDP代码(这一般都是由操作系统维护的)。
+
+```python
+
+from socket import *
+
+###  client ###
+    serverName = 'hostname'
+    serverPort = 12000
+    clientSocket = socket(AF_INET, SOCK_DGRAM) #AF_INET 代表IPV4 SOCK_DGRAM 代表UDP
+    message = raw_input('Input lowercase sentence:')
+    clientSocket.sendto(message.encode(),(serverName, serverPort))
+    modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
+    print(modifiedMessage.decode())
+    clientSocket.close()
+
+### server ###
+    serverPort = 12000
+    serverSocket = socket(AF_INET, SOCK_DGRAM)
+    serverSocket.bind(('', serverPort))
+    print("The server is ready to receive")
+    while True:
+        message, clientAddress = serverSocket.recvfrom(2048)  # 等待client传送
+        modifiedMessage = message.decode().upper()
+        serverSocket.sendto(modifiedMessage.encode(), clientAddress)
+```
+
+#### TCP socket
+
+```python
+
+from socket import *
+
+### client ###
+
+serverName = ’servername’
+serverPort = 12000
+clientSocket = socket(AF_INET, SOCK_STREAM)
+clientSocket.connect((serverName, serverPort)) # TCP 首先和server建立连接
+sentence = raw_input(’Input lowercase sentence:’)
+clientSocket.send(sentence.encode())           # 然后直接只传送数据
+modifiedSentence = clientSocket.recv(1024)
+print(’From Server: ’, modifiedSentence.decode())
+clientSocket.close()
+
+### server ###
+serverPort = 12000
+serverSocket = socket(AF_INET, SOCK_STREAM)
+serverSocket.bind((’’, serverPort))
+serverSocket.listen(1)                                   # 参数是等待的最大连接数
+print(’The server is ready to receive’)
+while True:
+    connectionSocket, addr = serverSocket.accept()       # 接收到client的地址完成TCP连接的建立
+    sentence = connectionSocket.recv(1024).decode()
+    capitalizedSentence = sentence.upper()
+    connectionSocket.send(capitalizedSentence.encode())  # 同理，只需要将数据发送就可以，而不需要再发送地址了
+    connectionSocket.close()
+```
