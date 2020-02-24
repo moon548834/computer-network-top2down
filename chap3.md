@@ -357,13 +357,79 @@ TCP就像我们之前讨论过的rdt协议一样，使用超时重传机制来�
 此外，测量RTT的变动程度也是有价值的，这个值称作DevRTT，表示SampleRTT和EstimatedRTT的误差有多大。公式如下: `DevRTT=(1−β)⋅DevRTT+β⋅|SampleRTT−EstimatedRTT|`β一般取作0.25，如果SampleRTT波动很小，那么DevRTT就会比较小，反之会比较大。
 
 这带来了一个新的问题，我们有了EstimatedRTT和DevRTT，那么究竟重传的时间限是多少呢？这个时间应该比EstimatedRTT大，否则会有很多不必要的重传，但是也不能太大，否则TCP对那些丢失的包，响应的速度将会下降。所以听起来，这个时间应该是EstimatedRTT加上一些余量，这些余量就是DevRTT了。
-最终的计算式如下：`TimeoutInterval=EstimatedRTT+4⋅DevRTT` 一般而言，TimeoutInterval被初始化为1。此外，当一个超时发生时，这个值将被double,这样可以避免过早的超时现象(即此时包已经正确接收了，但是ACK还在网络中没有传回来，暂时的double，可以解决此问题)。然后一旦段被接受了，EstimatedRTT更新了，那就仍然按照原来的方式进行计算TimeoutInterval。
+最终的计算式如下： 一般而言，TimeoutInterval被初始化为1。此外，当一个超时发生时，这个值将被double,这样可以避免过早的超时现象(即此时包已经正确接收了，但是ACK还在网络中没有传回来，暂时的double，可以解决此问题)。然后一旦段被接受了，EstimatedRTT更新了，那就仍然按照原来的方式进行计算TimeoutInterval。
 
 
+在我们先前的关于可靠传输的讨论中，我们一般把每个已被发送但还没用没有被ACK的段分配一个定时器，当然这在理论上很好，但是时钟管理也会带来很多其他的负担。因此推荐的TCP时钟管理仅仅使用一个重传的时钟管理单元，即使这里有很多没有被ACK的段。在这节的讨论中，只是用单定时器管理的模型。
 
+首先，我们给出一个高度简化的TCP发送者，使用超时机制来恢复那些丢失的段，接下来再呈现一个使用多次确认和超时机制的模型。在接下来的讨论中，我们假定数据只在一个方向传输:
 
+```
+NextSeqNum = InitialSeqNumber
+SendBase = InitialSeqNumber
 
+loop (forever) {
+    switch(event)
+        event: data received from application above
+            create TCP segment with sequence number NextSeqNum
+            if (timer not running) start timer
+            pass segment to IP
+            NextSeqNum = NextSeqNum + length(data)
+            break
 
+        event: timer timeout //超时的判断就是用刚才那个公式 EstimatedRTT+ 4DevRTT
+            retransmit not-yet-acknowledged segment with
+            smallest sequence number
+            start timer
+            break
+        event: ACK received, with ACK field value of y
+            if (y > SendBase) {
+                sendBase = y;
+                if (there are any not-yet-acknowledged segments) { // 所以实际上timer对应的是最远的那个未被ACK的数据
+                    start timer
+                }
+            }
+            break;
+}
+```
+
+即使这种TCP非常简单，实际上也会有一些微妙的场景
+
+(1)A发送给B一个数据段，序列号是92，拥有8字节的数据，这之后，A等待B的回应，尽管B收到了A这个包，但是B对A的ACK确丢失了，在这种情况下，超时发生，所以A重新发送同一个数据段。当B发现这个重传时，由于此时B端的确认号是100序列号小于这个B的确认号，所以B直接回传一个ACK即可。
+
+(2)A给B连续发送两个包，第一个包还是序列号92，长度8，第二个包序列号100，长度120。B同样都收到了这个包，并且发回给A了，但是呢由于网络比较拥堵，A在接收到这个ACK之前就已经超时了，所以A重新发送，这个时候只先重传92，然后重新开始timer，这个时候会收到由于网络拥堵迟来的ACK，这个时候只要ACK120在第二个timeout之前回来了，那么第二个包就不会重传。
+
+(3)A发送给B两个端(同2)，B都正确收到了并且分别发出了ACK100和ACK120只不过这个时候ACK100丢了,ACK120回到了A(假定都在timeout内)，这个时候A其实就已经知道B收到了119之前的所有byte，所以A就不会重传任何包。
+
+#### double 超时时限
+
+现在我们讨论一种大多数TCP都会使用的机制。当超时发生时，TCP重传哪个拥有最小序列的包。但是每次重传它会被时间设置为两倍先前的值。不过当重传的这些包被正确ACK之后，超时的时限又会由EstimatedRTT和DevRT决定了。
+
+这种方法在拥堵控制上有一些作用，如果source不停重传包的话，拥堵会更加严重，所以TCP会延长(double)这个时间从而减小线路的拥堵。
+
+#### 快速重传
+
+由超时引起的重传实际上也会带来一个问题，那就是端到端的延时还是比较长的。不过幸运的是，通常发送者可以在超时之前检测到包的丢失，这一般通过重复ACK来实现。
+
+这个表格踪迹了TCP接收端的产生ACK的准则:
+
+| event                                                      | TCP Receiver Action
+| ----------------------------------------------------------    | ---------------------------
+| 接受到的包对应期望的序列号<br />并且之前的数据都被ACK了          | 延时ACK，等待最多500ms用来等待另一个顺序的包，<br />
+                                                                    如果下一个包没有在这500ms到来，就发送ACK 
+| 接收到的包对应期望的序列号<br />但是一个其他的包正在等待传输ACK   | 发送单独的cumulative的ACK ??
+| 接收到的包超过期望的序列号 (这部分称为gap)                       | 迅速发送多个ACK，表征下一个期望的序列号 ??
+| 接收到的包在gap中                                              | 立刻发送ACK 
+
+好吧上个表我也没太搞懂，还是看图吧:
+
+<div align=center>  
+ 
+![](./IMG/3-5-5_fast_retrans.PNG)
+
+</div>
+
+当发送第二个包的时候丢失了，第一个包接受的时候发送断开启计时(因为此时包2,3,4,5都还没收到)，此时第一个被正确接手之后，接收端由于一直没收到第二个包，又由于累计确认的缘故，只会发送ack100,当发送到第三次的时候，发送端就会触发快速重传了，重新发送包2。
 
 
 
