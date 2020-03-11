@@ -15,11 +15,7 @@
 - transmission 这个时间定义为 L/R 其中L代表这个包的长度，R代表传输速率，比如R = 100Mbps之类的
 - propagation  这个延时定义为 d/s 其中d代表distance， s代表speed， 一般而言s比光速慢一点
 
-<div align=center>  
- 
-![](./IMG/1-4-2-average_quening_delay.PNG)
-
-</div>
+<center> ![](./IMG/1-4-2-average_quening_delay.PNG) </center>
 
 对于queuing delay,需要注意的是，La/R < 1，其中L是每个包的bit数，a是每秒中包的个数，R是路由传输数据的速率，可想而知，如果此数值大于1，那么queuing delay将会增加到无穷大，另外，随着该值的增加，queuing delay呈**指数**增加。
 
