@@ -15,7 +15,7 @@
 - transmission 这个时间定义为 L/R 其中L代表这个包的长度，R代表传输速率，比如R = 100Mbps之类的
 - propagation  这个延时定义为 d/s 其中d代表distance， s代表speed， 一般而言s比光速慢一点
 
-<center> ![](./IMG/1-4-2-average_quening_delay.PNG) </center>
+![](./IMG/1-4-2-average_quening_delay.PNG) 
 
 对于queuing delay,需要注意的是，La/R < 1，其中L是每个包的bit数，a是每秒中包的个数，R是路由传输数据的速率，可想而知，如果此数值大于1，那么queuing delay将会增加到无穷大，另外，随着该值的增加，queuing delay呈**指数**增加。
 
@@ -24,11 +24,9 @@
 
 对于吞吐量而言，一般router之间的速率很快，所以速度只取决于server到第一个router和，最后的router到client的速率最小值。对于更现实的多个client连接多个server而言，如果R远大于Rs和Rc的话，依然公式不变，如果R比较小的话，那就是R/N了。(图中N是10)
 
-<div align=center>  
 
 ![](./IMG/1-4-4-throughout.PNG)
 
-</div>
 
 ### 1.5 协议层
 ```
@@ -51,11 +49,7 @@
 
 一个非常直观的描述图，描述PC，交换机，路由器各自工作的layer。
 
-<div align=center>  
-
 ![](IMG/1-5-2-layers_protocol.PNG)
-
-</div>
 
 
 ### 1.6 当网络受到攻击

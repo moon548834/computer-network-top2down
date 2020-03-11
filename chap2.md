@@ -50,11 +50,9 @@ HTTP是一个无状态保存的协议，因为HTTP的server端并不保存任何
 
 在HTTP/1.0里面，请求一个文件就需要初始化关闭TCP连接，这使得每次请求都需要2个RTT加上一个发送时间
 
-<div align=center>  
  
 ![](./IMG/2-2-2-none_persistence_connection.PNG)
 
-</div>
 
 这种非连续连接会使得服务器负担很重，所以在HTTP/1.1中改进出了连续连接的方式，它可以让连接在返回响应后仍保持一定的时间，默认的连续连接模式是流水的，这就可以使得客户端连续发送报文请求，每次的间隔只有1个RTT，并且server端一直处于有事做的状态。
 
@@ -76,11 +74,9 @@ method除了最常用的GET外还有POST，HEAD，PUT和DELETE
 
 下面是一个通用的报文格式
 
-<div align=center>  
  
 ![](./IMG/2-2-3-general_HTTP_message.PNG)
 
-</div>
 
 因为上个例子里面，method是GET，所以body是空的，而对于POST而言，POST一般使用在用户填写一些信息的时候，body就不是空的了。
 
@@ -124,11 +120,9 @@ Content-Type: text/html
 - 用户系统的Cookies文件
 - 网站保存Cokkies的数据库
 
-<div align=center>  
  
 ![](./IMG/2-2-4-cookies.PNG)
 
-</div>
 
 这样Amazon就可以知道给我推荐什么东西了，而且我买东西的时候只需傻瓜一件点击即可，登录的操作也免除了。
 
@@ -140,11 +134,9 @@ Web cache或者说proxy server,代理服务器是拥有自己的硬盘空间来�
 
 通常Web cache是ISP购买安装的，一般学校里面也会有，这样会大大降低网络的拥堵程度，减少请求的时间。
 
-<div align=center>  
  
 ![](./IMG/2-2-5-web_cache.PNG)
 
-</div>
 
 #### conditional GET
 
@@ -154,11 +146,9 @@ Web cache或者说proxy server,代理服务器是拥有自己的硬盘空间来�
 
 在不同的邮件server端通过SMTP协议传输，SMTP依托TCP
 
-<div align=center>  
  
 ![](./IMG/2-3-1-email_system.PNG)
 
-</div>
 
 由上图，一个网络的邮件系统由三部分组成，用户代理(如Outlook)，邮件服务器，SMTP传输协议。
 
@@ -205,11 +195,9 @@ To: bob@hamburger.edu
 Subject: XXX
 ```
 
-<div align=center>  
  
 ![](./IMG/2-3-4-email_with_server.PNG)
 
-</div>
 
 用户在PC上运行用户代理，理论上讲，邮件server可以在他的PC上，单这要求他的PC一直不关机，所以通常的办法如上图所示。需要注意的是，SMTP是一个push的协议，所以对于图中Bob的server端到Bob的用户代理，不能用SMTP。这部分通常用POP3，IMAP或者HTTP完成。
 
@@ -243,11 +231,9 @@ POP3协议的一个特点是，只要用户从POP3服务器读取了邮件，这
 另一种协议是IMAP，比较复杂，他将每个邮件和文件夹联系了起来，这样就不会有读取完删除在另一台PC无法看的问题了。另一个特点是IMAP运行用户获取邮件的一部分信息，比如只获取header。
 
 
-<div align=center>  
  
 ![](./IMG/2-3-4_email_with_server.PNG)
 
-</div>
 
 用户在PC上运行用户代理，理论上讲，邮件server可以在他的PC上，单这要求他的PC一直不关机，所以通常的办法如上图所示。需要注意的是，SMTP是一个push的协议，所以对于图中Bob的server端到Bob的用户代理，不能用SMTP。这部分通常用POP3，IMAP或者HTTP完成。
 
@@ -281,11 +267,9 @@ POP3协议的一个特点是，只要用户从POP3服务器读取了邮件，这
 另一种协议是IMAP，比较复杂，他将每个邮件和文件夹联系了起来，这样就不会有读取完删除在另一台PC无法看的问题了。另一个特点是IMAP运行用户获取邮件的一部分信息，比如只获取header。
 
 
-<div align=center>  
  
 ![](./IMG/2-3-5-POP3_IMAP.PNG)
 
-</div>
 
 ### 2.4 FTP
 
@@ -311,22 +295,18 @@ DNS同时还提供了其他几种功能:
 
 #### DNS系统组成
 
-<div align=center>  
  
 ![](./IMG/2-5-1-dns_hierarchy.PNG)
 
-</div>
 
 DNS是一个分布式的系统，因为如果所有的映射都保存在一个server，这会带来很多问题。所以形成了如图所示的结构。一共有三种DNS服务器，root, TLD(顶级域名服务器)和authoritative(权限/权威域名服务器)。
 
 #### DNS查询
 
 
-<div align=center>  
  
 ![](./IMG/2-5-2-dns-interaction.PNG)
 
-</div>
 
 如图所示，还有另一种回溯的办法，不过在实际中，是用上图的迭代法，准确来说:host到local DNS服务器是回溯的，其他的都是迭代的。
 
@@ -360,11 +340,9 @@ TTL是RR的生命有效期，先可以忽略掉。
 
 peer从其他peer每次下载一个数据块，大小是256KB，每一个torrent都会有一个跟踪器，用来记录在这个大区域中其他的peer信息。
 
-<div align=center>  
  
 ![](./IMG/2-6-1-file_distribution.PNG)
 
-</div>
 
 这样如图所示，当一个新的伙伴(Alice)加入这个块时，tracker随机的选择一些peer，并且把这些peer的IP地址信息给Alice。于是乎，Alice就会去和他们进行TCP的连接，不过随着时间柳树，一些邻居会离开，一些新的邻居会加入，所以与之相交互的peer不断改变。
 
@@ -390,11 +368,8 @@ the range [0, 15]. Further suppose that there are eight peers in the system with
 
 假设有一个peer, Alice想要插入一个pair到DHT中，她首先确定哪个标识符离得最近，然后她会给那个标识符(实际上是peer)发送个信息，告诉他存储这个pair。但是Alice怎么知道哪个peer离这个key最近呢，如果Alice知道所有peer的ID和对应的IP地址的话，那她就可以一下子访问到了，不过这在实际的大型系统也是不可能的，一种折中的方法是存储Log2N的pair。
 
-<div align=center>  
  
 ![](./IMG/2-6-2-circular_DHT.PNG)
-
-</div>
 
 ### 2.7 socket
 
