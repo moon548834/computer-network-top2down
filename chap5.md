@@ -203,6 +203,17 @@ OpenFlow协议是位于SDN控制器和一个SDN控制的交换机或者其他实
 2. SDN控制器收到1中的信息，并告知链路状态管理器，后者更新链路状态数据库。
 3. 网络层控制的应用(实现了Dijkstra的算法那个)收到了这个状态改变的信息。
 4. 该应用和链路状态管理器进行交互并更新链路状态，并可能和其他的组件交互，最终生成新的最小代价路径。
-5. 应用和流表管理器交互
-6. 流表管理器使用openflow协议更新流表入口。;
+5. 应用和流表管理器交互。
+6. 流表管理器使用openflow协议更新流表入口。
 
+## 5.6 ICMP(Internet Control Message Protocol)
+
+ICMP是host和router交互网络层信息的途径。最经典的ICMP使用是错误报告。例如当运行一个HTTP会话时，可能会包含一个错误的信息如目标网络地址不可到达。
+
+ICMP通常被认为是IP的一部分，但是从结构上讲，它位于IP的上方，因为ICMP的消息是位于IP数据报内部的。也就是ICMP信息以IP payload的形式携带传输。就像TCP和UDP的段以IP payload的形式传输一样。
+
+ICMP信息有type和code位，并且包含头部和IP数据报的前8个字节。最著名的ping陈谷，发送ICMP type8 code0 信息to特定的host。然后目标host响应这个echo，发送type0 code0的ICMP信息。
+
+另一个关于ICMP信息的有趣之处是source quench(熄灭) message. 在实际中这个内容虽然很少使用。它原本的目的是进行拥堵控制，它允许一个路由器给一个host发送一个ICMP报文使得其减少传输速率。
+
+> Traceroute也是依靠ICMP实现的
